@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:music-catalogue-api="http://www.mulesoft.org/schema/mule/music-catalogue-api"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/music-catalogue-api http://www.mulesoft.org/schema/mule/music-catalogue-api/current/mule-music-catalogue-api.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="getProductsById" doc:id="1b87c908-05b7-4a4a-8162-6ff6c1494c86" >
+		<db:select doc:name="Select" doc:id="55b42a8a-0517-4668-8fd0-0d0097faee80" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT product.*, product_category.category_name FROM product
+INNER JOIN product_category ON product.category_id=product_category.id
+WHERE product.id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{id: attributes.uriParams.id}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="c34391ec-a8a8-4007-83bf-8a0b62fd528f" message="Product not found"/>
+		<ee:transform doc:name="Transform Message" doc:id="abaf2129-9c2e-4893-b3f1-e0e3ad7cd304" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload , indexOfPayload ) -> {
+	id: payload.id,
+	sku: payload.sku,
+	name: payload.name,
+	description: payload.description,
+	unit_price: payload.unit_price,
+	image_url: payload.image_url,
+	active: payload.active,
+	units_in_stock: payload.units_in_stock,
+	date_created: payload.date_created as String default "",
+	last_updated: payload.last_updated as String default "",
+	category: {
+		id: payload.category_id,
+		category_name: payload.category_name
+	}
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ae091c33-3f54-44f8-9e88-e123c6a4daef" type="VALIDATION:EMPTY_COLLECTION">
+				<ee:transform doc:name="Transform Message" doc:id="8149c5fa-79cf-4897-be3a-5e24daaeb037" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Product not found!"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

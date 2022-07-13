@@ -1,0 +1,11 @@
+#HTTP Listener
+http:
+  port: "8081"
+  
+# Database config
+db:
+  host: "localhost"
+  port: "3306"
+  user: "root"
+  password: "Milica2014!"
+  database: "my-music-shop-app"

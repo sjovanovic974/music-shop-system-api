@@ -1,0 +1,16 @@
+{
+  "id": 12,
+  "sku": "LP000002",
+  "name": "Slayer - South of Heaven",
+  "description": "South of Heaven is the fourth studio album by American thrash metal band Slayer, released on July 5, 1988 by Def Jam Recordings.",
+  "unit_price": 23.99,
+  "image_url": "https://cdn-icons-png.flaticon.com/512/32/32328.png",
+  "active": true,
+  "units_in_stock": 8,
+  "date_created": "2022-03-15T16:11:11Z",
+  "last_updated": "2022-03-15T16:11:11Z",
+  "category": {
+    "id": 2,
+    "category_name": "Vinyl"
+  }
+}
